@@ -1,0 +1,67 @@
+language: rust
+
+rust:
+  - stable
+
+jobs:
+  include:
+    - arch: amd64
+      os: osx
+      osx_image: xcode12
+      addons:
+        homebrew:
+          packages:
+            - protobuf
+            - zeromq
+      env:
+        - TARGET=macos-amd64
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file: lion-$TRAVIS_TAG-$TARGET.tar.gz
+        skip_cleanup: true
+        on:
+          repo: pashinov/lion
+          tags: true
+    - arch: amd64
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - libprotobuf-dev
+            - protobuf-compiler
+            - libzmq3-dev
+      env:
+        - TARGET=linux-amd64
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file: lion-$TRAVIS_TAG-$TARGET.tar.gz
+        skip_cleanup: true
+        on:
+          repo: pashinov/lion
+          tags: true
+    - arch: arm64
+      os: linux
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - libprotobuf-dev
+            - protobuf-compiler
+            - libzmq3-dev
+      env:
+        - TARGET=linux-arm64
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file: lion-$TRAVIS_TAG-$TARGET.tar.gz
+        skip_cleanup: true
+        on:
+          repo: pashinov/lion
+          tags: true
+
+script:
+  - cargo build --release
+  - if [ -n "$TRAVIS_TAG" ]; then tar -C  target/release -czf lion-$TRAVIS_TAG-$TARGET.tar.gz lion; fi
