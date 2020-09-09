@@ -1,0 +1,30 @@
+{
+  "Config": {
+
+    "Application": {
+      "Name": "lion",
+      "Version": "0.1.0"
+    },
+
+    "System": {
+      "Daemon": {
+        "PidPath": "/tmp/lion.pid"
+      },
+      "Logging": {
+        "Level": "info",
+        "Path" : "/tmp/lion.log"
+      }
+    },
+
+    "ZMQ": {
+      "Frontend": {
+        "Addr": "ipc:///tmp/lion_frontend.socket"
+      },
+      "Backend": {
+        "Addr": "ipc:///tmp/lion_backend.socket",
+        "Workers": 5
+      }
+    }
+
+  }
+}
