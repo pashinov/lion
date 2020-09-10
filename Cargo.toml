@@ -1,6 +1,6 @@
 [package]
 name = "lion"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Alexey Pashinov <pashinov93@gmail.com>"]
 edition = "2018"
 
@@ -13,6 +13,7 @@ config = "0.10"
 daemonize = "0.4"
 log = "0.4"
 log4rs = "0.12"
+platforms = "0.2.1"
 protobuf = "=2.14"
 signal-hook = "0.1"
 systemstat = "0.1"

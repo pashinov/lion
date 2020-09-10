@@ -4,7 +4,7 @@ use protobuf::Message;
 use crate::hal;
 use crate::lion;
 
-pub fn handle_request(request: &String) -> String {
+pub fn handle_request(request: &String) -> Vec<u8> {
     let request: lion::Request = protobuf::parse_from_bytes(request.as_bytes()).unwrap();
 
     let mut response = lion::Response::new();
@@ -52,6 +52,118 @@ pub fn handle_request(request: &String) -> String {
         lion::CommandType::GET => {
             if request.get_resource().has_sysinfo() {
                 match request.get_resource().get_sysinfo().field_type {
+                    lion::SysInfoType::ARCH => {
+                        match hal::sysinfo::get_arch() {
+                            Ok(arch) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(arch);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get ARCH");
+                            },
+                        }
+                    },
+                    lion::SysInfoType::OS => {
+                        match hal::sysinfo::get_os() {
+                            Ok(os) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(os);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get OS");
+                            },
+                        }
+                    },
+                    lion::SysInfoType::OS_RELEASE => {
+                        match hal::sysinfo::get_os_release() {
+                            Ok(os_release) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(os_release);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get OS Release");
+                            },
+                        }
+                    },
+                    lion::SysInfoType::CPU_NUM => {
+                        match hal::sysinfo::get_cpu_num() {
+                            Ok(cpu_num) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_uval(cpu_num);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get CPU numbers");
+                            },
+                        }
+                    },
+                    lion::SysInfoType::CPU_SPEED => {
+                        match hal::sysinfo::get_cpu_speed() {
+                            Ok(cpu_speed) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_uval(cpu_speed as u32);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get CPU speed");
+                            },
+                        }
+                    },
+                    lion::SysInfoType::STORAGE_TOTAL => {
+                        match hal::sysinfo::get_storage_total() {
+                            Ok(storage_total) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_uval(storage_total as u32);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get Storage Total space");
+                            },
+                        }
+                    },
+                    lion::SysInfoType::STORAGE_FREE => {
+                        match hal::sysinfo::get_storage_free() {
+                            Ok(storage_free) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_uval(storage_free as u32);
+                                response.set_payload(payload);
+                                response.status = lion::ResponseStatus::OK;
+                            },
+                            Err(err) => {
+                                let mut payload = lion::PayloadType::new();
+                                payload.set_sval(err.to_string());
+                                response.set_payload(payload);
+                                error!("Failed to get Storage Free space");
+                            },
+                        }
+                    },
                     lion::SysInfoType::UPTIME => {
                         match hal::sysinfo::get_uptime() {
                             Ok(uptime) => {
@@ -64,23 +176,7 @@ pub fn handle_request(request: &String) -> String {
                                 let mut payload = lion::PayloadType::new();
                                 payload.set_sval(err.to_string());
                                 response.set_payload(payload);
-                                error!("Failed to get a uptime of board");
-                            },
-                        }
-                    },
-                    lion::SysInfoType::BOOT_TIME => {
-                        match hal::sysinfo::get_boot_time() {
-                            Ok(boot_time) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(boot_time);
-                                response.set_payload(payload);
-                                response.status = lion::ResponseStatus::OK;
-                            },
-                            Err(err) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(err.to_string());
-                                response.set_payload(payload);
-                                error!("Failed to get a boot time of board");
+                                error!("Failed to get Uptime");
                             },
                         }
                     },
@@ -96,55 +192,7 @@ pub fn handle_request(request: &String) -> String {
                                 let mut payload = lion::PayloadType::new();
                                 payload.set_sval(err.to_string());
                                 response.set_payload(payload);
-                                error!("Failed to get a temperature of board");
-                            },
-                        };
-                    },
-                    lion::SysInfoType::OS_INFO => {
-                        match hal::sysinfo::get_os_info() {
-                            Ok(os_info) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(os_info);
-                                response.set_payload(payload);
-                                response.status = lion::ResponseStatus::OK;
-                            },
-                            Err(err) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(err.to_string());
-                                response.set_payload(payload);
-                                error!("Failed to get a os info of board");
-                            },
-                        };
-                    },
-                    lion::SysInfoType::CPU_INFO => {
-                        match hal::sysinfo::get_cpu_info() {
-                            Ok(cpu_info) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(cpu_info);
-                                response.set_payload(payload);
-                                response.status = lion::ResponseStatus::OK;
-                            },
-                            Err(err) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(err.to_string());
-                                response.set_payload(payload);
-                                error!("Failed to get a cpu info of board");
-                            },
-                        };
-                    },
-                    lion::SysInfoType::DISK_INFO => {
-                        match hal::sysinfo::get_disk_info() {
-                            Ok(disk_info) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(disk_info);
-                                response.set_payload(payload);
-                                response.status = lion::ResponseStatus::OK;
-                            },
-                            Err(err) => {
-                                let mut payload = lion::PayloadType::new();
-                                payload.set_sval(err.to_string());
-                                response.set_payload(payload);
-                                error!("Failed to get a disk info of board");
+                                error!("Failed to get Temperature");
                             },
                         };
                     },
@@ -158,5 +206,5 @@ pub fn handle_request(request: &String) -> String {
         },
     }
 
-    String::from_utf8(response.write_to_bytes().unwrap()).expect("Found invalid UTF-8")
+    response.write_to_bytes().unwrap()
 }
